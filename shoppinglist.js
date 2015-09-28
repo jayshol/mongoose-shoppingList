@@ -18,8 +18,8 @@ var server = http.createServer(function(req, res){
 			});
 
 			req.on('end', function(){
-				items.create(item);
-				res.end('Item added\n');
+				items.create(item, req, res);
+				//res.end('Item added\n');
 			});
 			break;
 		case 'GET' :

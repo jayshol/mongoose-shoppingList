@@ -1,49 +1,67 @@
-var mongoose = require('mongoose');
-var db = require('./db');
-var itemSchema = new mongoose.Schema({
-	item : String
-});
-var ItemObj = mongoose.model('Item', itemSchema);
+						
+var listDAO = require('./list').listDAO;
+var lists = new listDAO();
 
+exports.create = function(item, req, res){
+	/**/
 
-exports.create = function(item){
-	var newObj = new ItemObj({item:item});
-	newObj.save(function(err, item){
-		if(err) return console.log(err);			
+	lists.createItem({item:item}, function(err, inserted){
+		if(err){
+			 console.log(err);
+			 res.end('Error');
+		} else {
+			res.end('Item Added.');
+		}
+
 	});
+
 }
 
 exports.retrieveAll = function(req, res){	
-	ItemObj.find(function(err, items){
-		if(err) return console.error(err);
-		items.forEach(function(item, i){
-			res.write(i + "." + item + "\n");
-		});
-		res.end();
-	});
+	lists.retrieveAllItems(function(err, items){
+		if(err){
+			console.log(err);	
+			res.end('Error');
+		} else {
+			items.forEach(function(item, i){
+				res.write(i + "." + item + "\n");
+			});
+			res.end();
+		}			
+	});	
 }
 
 exports.retrieveOne = function(req, res, param){
-	ItemObj.find({item:param}, function(err, item){
-		if(err) return console.error(err);
-		console.log(item[0]);
-		res.write('Item is :' + item[0].item);
-		res.end();
-	});
+	lists.retrieveOneItem({item:param}, function(err, item){
+		if(err){
+			console.error(err);
+			res.end('Error');
+		}else{			
+			res.write('Item is :' + item[0].item);
+			res.end();
+		}
+	});	
 }
 
 exports.delete = function(req, res,id) {
-    ItemObj.remove({item:id}, function (err, result) {
-        if (err) return console.error(err);
-        res.write('item deleted successfully.');
-        res.end();
-    });
+	lists.deleteItem({item:id}, function(err, result){
+		if (err){
+			 console.error(err);
+			 res.end('Error')	;
+		} else {
+			res.write('Item deleted successfully.');
+        	res.end();
+		}        
+	});    
 }
 
 exports.update = function(req, res, param, newItem) {
-    ItemObj.update({item: param},{item:newItem}, function (err, result) {
-        if (err) return console.error(err);
-        res.write('Item updated.');
-        res.end();
-    });
+	lists.updateItem({item: param}, {item:newItem}, function(err, result){
+		if(err){
+			res.end(err);
+		} else {
+			res.write('Item updated.');
+        	res.end();
+		}
+	});    
 }
